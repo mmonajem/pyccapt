@@ -3,8 +3,8 @@ import cv2
 
 import numpy as np
 
-from pypylon import pylon
-from pyccapt.tools import variables
+#from pypylon import pylon
+from tools import variables
 
 
 class Camera:

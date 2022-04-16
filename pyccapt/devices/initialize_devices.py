@@ -1,9 +1,9 @@
 import time
 import serial.tools.list_ports
 
-from pyccapt.devices.pfeiffer_gauges import TPG362
-from pyccapt.devices.edwards_tic import EdwardsAGC
-from pyccapt.tools import variables
+from devices.pfeiffer_gauges import TPG362
+from devices.edwards_tic import EdwardsAGC
+from tools import variables
 
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
@@ -126,13 +126,15 @@ def initialize_edwards_tic_load_lock(conf):
         Does not return anything
 
     """
-    E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
-    # Execute command to read value(response)
-    response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_ll)
-    # Update the load lock parameters
-    variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-    variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-
+    try:
+        E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
+        # Execute command to read value(response)
+        response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_ll)
+        # Update the load lock parameters
+        variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+        variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+    except Exception as error:
+        return -1
 
 def initialize_edwards_tic_buffer_chamber(conf):
     """
@@ -147,11 +149,12 @@ def initialize_edwards_tic_buffer_chamber(conf):
         Does not return anything
 
     """
-
-    E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
-    response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_bc, )
-    variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-
+    try:
+        E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
+        response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_bc, )
+        variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+    except Exception as error:
+        return -1
 
 def initialize_pfeiffer_gauges():
     """
@@ -167,13 +170,16 @@ def initialize_pfeiffer_gauges():
     Returns:
         Does not return anything
     """
-    tpg = TPG362(port=variables.COM_PORT_gauge_mc)
-    value, _ = tpg.pressure_gauge(2)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_main = '{}'.format(value)
-    value, _ = tpg.pressure_gauge(1)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_buffer = '{}'.format(value)
+    try:
+        tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+        value, _ = tpg.pressure_gauge(2)
+        # unit = tpg.pressure_unit()
+        variables.vacuum_main = '{}'.format(value)
+        value, _ = tpg.pressure_gauge(1)
+        # unit = tpg.pressure_unit()
+        variables.vacuum_buffer = '{}'.format(value)
+    except Exception as error:
+        return -1
 
 
 def gauges_update(conf, lock, com_port_cryovac):

@@ -4,40 +4,47 @@ This is the main script is load the GUI base on the configuration file.
 """
 
 from copy import error
+from logging import raiseExceptions
 import sys
 import os
 import threading
 from PyQt5 import QtWidgets
 # Serial ports and Camera libraries
 import serial.tools.list_ports
-from pypylon import pylon
+#from pypylon import pylon
 
 # Local module and scripts
-from pyccapt.tools import variables
-from pyccapt.tools import read_files
-from pyccapt.devices.camera import Camera
-from pyccapt.devices import initialize_devices
-from pyccapt.gui import gui_simple
-from pyccapt.gui import gui_advance
+from tools import variables
+from tools import read_files
+from devices.camera import Camera
+from devices import initialize_devices
+from gui import gui_simple
+from gui import gui_advance
 
-from pyccapt.tools.module_dir import MODULE_DIR
+from tools.module_dir import MODULE_DIR
 
-def load_json_file():
-    try:
-        # load the Json file
-        configFile = 'config.json'
+
+def print_log(string_to_be_printed):
+    print(string_to_be_printed)
+
+
+def load_json_file(configFile = None):
+    try:      
+        if configFile == None:
+            configFile = 'config.json'  
         os.chdir(os.path.split(MODULE_DIR)[0])
         conf = read_files.read_json_file(configFile)
         return conf
     except FileNotFoundError as e:
-        print("The config.json was not found")
+        print_log("Config file not found")
         print(e)
     except Exception as e:
         print("Error in load_json_file",e)
 
 def initialize_gauges_update_thread(conf,lock1,com_port_idx_cryovac):
     try:
-
+        if "gauges" not in conf:
+            raise KeyError
         if conf['gauges'] != "off":
             # Thread for reading gauges
             gauges_thread = threading.Thread(target=initialize_devices.gauges_update,
@@ -45,18 +52,22 @@ def initialize_gauges_update_thread(conf,lock1,com_port_idx_cryovac):
             gauges_thread.setDaemon(True)
             gauges_thread.start()
     except KeyError as error:
-        print("Key not found",error)
+        print_log("Key not found")
+        
     
 def check_gauges_com_port_mc(conf):
     try:
+        
         if conf['COM_PORT_gauge_mc'] == "off":
-                print('The main chamber gauge is off')
+                print_log('The main chamber gauge is off')
         else:
                 # Config the port for Main and Buffer vacuum gauges
                 try:
-                    initialize_devices.initialize_pfeiffer_gauges()
+                    response = initialize_devices.initialize_pfeiffer_gauges()
+                    if response == -1:
+                        raise Exception
                 except Exception as e:
-                    print('Can not initialize the Pfeiffer gauges')
+                    print_log('Can not initialize the Pfeiffer gauges')
                     print(e)
     except KeyError as error:
         print("Key not found",error)
@@ -69,9 +80,11 @@ def check_gauges_com_port_bc(conf):
         else:
             # Config the port for Buffer chamber vacuum gauges
             try:
-                initialize_devices.initialize_edwards_tic_buffer_chamber(conf)
+                response  = initialize_devices.initialize_edwards_tic_buffer_chamber(conf)
+                if response == -1:
+                    raise Exception
             except Exception as e:
-                print('Can not initialize the buffer vacuum gauges')
+                print_log('Can not initialize the buffer vacuum gauges')
                 print(e)
     except KeyError as error:
         print("Key not found -> ",error)
@@ -84,9 +97,11 @@ def check_gauges_com_port_ll(conf):
         else:
             # Config the port for Load Lock vacuum gauges
             try:
-                initialize_devices.initialize_edwards_tic_load_lock(conf)
+                response = initialize_devices.initialize_edwards_tic_load_lock(conf)
+                if response == -1:
+                    raise Exception
             except Exception as e:
-                print('Can not initialize the load lock gauges')
+                print_log('Can not initialize the load lock gauges')
                 print(e)
     except KeyError as error:
         print("Key not found",error)
