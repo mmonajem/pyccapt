@@ -1,22 +1,17 @@
 import unittest
-from unittest import main
-from defer import return_value
-from numpy import empty
 import pytest
-import io
-import json
 from unittest.mock import patch, Mock, MagicMock
 import sys
 from pypylon import pylon
 from PyQt5 import QtWidgets
 
+sys.path.append('../../')
+
 tlFactory = pylon.TlFactory.GetInstance()
-sys.path.append("/home/harsh/researchAssistant/pyccapt")
-sys.path.append("/home/harsh/researchAssistant/pyccapt/pyccapt")
-import main
-from devices import initialize_devices
-from gui import gui_advance
-from tools import variables
+from pyccapt import main as main
+from pyccapt.devices import initialize_devices
+from pyccapt.gui import gui_advance
+from pyccapt.tools import variables
 
 class Camera:
      def __init__(self, devices, tlFactory, cameras, converter):
@@ -57,7 +52,6 @@ config =  {
 
 @patch.object(main, "print_log")
 def test_load_json_file_file_not_found(mock):
-    #import main 
     config_file = 'wrong_config.json'
     
     config_response = main.load_json_file(config_file)
@@ -65,7 +59,6 @@ def test_load_json_file_file_not_found(mock):
 
 
 def test_load_json_file_check_valid_dict():
-    import main 
     config_file = 'config.json'
     config_response = main.load_json_file(config_file)
     test_response = {
@@ -124,7 +117,7 @@ def test_initialize_gauges_update_thread_gauges_equal_on(mock):
     main.initialize_gauges_update_thread(conf,lock,com_port_idx_cryovac)
     mock.assert_called()
 
-@patch("devices.initialize_devices.initialize_pfeiffer_gauges")
+@patch("pyccapt.devices.initialize_devices.initialize_pfeiffer_gauges")
 def test_check_gauges_com_port_mc_port_on(mock):
     conf = {
         "mode": "advance",
@@ -137,7 +130,7 @@ def test_check_gauges_com_port_mc_port_on(mock):
     main.check_gauges_com_port_mc(conf)
     mock.assert_called()
 
-@patch("devices.initialize_devices.initialize_pfeiffer_gauges", return_value=-1)
+@patch("pyccapt.devices.initialize_devices.initialize_pfeiffer_gauges", return_value=-1)
 @patch.object(main, "print_log")
 def test_check_gauges_com_port_mc_port_on_exception(mock_main,mock):
     conf = {
@@ -151,7 +144,7 @@ def test_check_gauges_com_port_mc_port_on_exception(mock_main,mock):
     main.check_gauges_com_port_mc(conf)
     mock_main.assert_called_with("Can not initialize the Pfeiffer gauges")
 
-@patch("devices.initialize_devices.initialize_edwards_tic_buffer_chamber")
+@patch("pyccapt.devices.initialize_devices.initialize_edwards_tic_buffer_chamber")
 def test_check_gauges_com_port_bc_port_on(mock):
     conf = {
         "mode": "advance",
@@ -164,7 +157,7 @@ def test_check_gauges_com_port_bc_port_on(mock):
     main.check_gauges_com_port_bc(conf)
     mock.assert_called()
 
-@patch("devices.initialize_devices.initialize_edwards_tic_buffer_chamber", return_value=-1)
+@patch("pyccapt.devices.initialize_devices.initialize_edwards_tic_buffer_chamber", return_value=-1)
 @patch.object(main, "print_log")
 def test_check_gauges_com_port_bc_port_on_exception(mock_main,mock):
     conf = {
@@ -178,7 +171,7 @@ def test_check_gauges_com_port_bc_port_on_exception(mock_main,mock):
     main.check_gauges_com_port_bc(conf)
     mock_main.assert_called_with("Can not initialize the buffer vacuum gauges")
 
-@patch("devices.initialize_devices.initialize_edwards_tic_load_lock")
+@patch("pyccapt.devices.initialize_devices.initialize_edwards_tic_load_lock")
 def test_check_gauges_com_port_ll_port_on(mock):
     conf = {
         "mode": "advance",
@@ -191,7 +184,7 @@ def test_check_gauges_com_port_ll_port_on(mock):
     main.check_gauges_com_port_ll(conf)
     mock.assert_called()
 
-@patch("devices.initialize_devices.initialize_edwards_tic_load_lock", return_value=-1)
+@patch("pyccapt.devices.initialize_devices.initialize_edwards_tic_load_lock", return_value=-1)
 @patch.object(main, "print_log")
 def test_check_gauges_com_port_ll_port_on_exception(mock_main,mock):
     conf = {
@@ -208,6 +201,7 @@ def test_check_gauges_com_port_ll_port_on_exception(mock_main,mock):
 @patch.object(main,"check_gauges_com_port_mc")
 @patch.object(main,"check_gauges_com_port_bc")
 @patch.object(main,"check_gauges_com_port_ll")
+
 def test_check_gauges_gauges_equal_on(mock_ll,mock_bc,mock_mc):
     conf = {
         "mode": "advance",
@@ -241,34 +235,10 @@ def test_check_camera_zero_device_exception():
     empty_tuple = ()
     tlFactory.EnumerateDevices  = MagicMock(return_value = empty_tuple)
     main.check_camera(conf)
-'''
-#@patch("main.tlFactory.EnumerateDevices",return_value=('40063823','40063423'))
-@patch("threading.Thread")
-def test_check_camera_zero_device_successful_spawn(mock):
-    import threading
-    conf = {
-        "mode": "advance",
-        "visualization": "tof",
-        "tdc": "on",
-        "cryo":"on",
-        "COM_PORT_gauge_mc":"on",
-        "COM_PORT_gauge_bc":"on",
-        "COM_PORT_gauge_ll":"on",
-        "camera": "on"
-    }
-    tlFactory = pylon.TlFactory.GetInstance()
-    tlFactory.EnumerateDevices  = Mock(return_value = ('40063823','40063423'))
-    Camera = MagicMock()
-    threading.Lock = MagicMock()
-    main.check_camera(conf)
-    mock.assert_called()
 
-'''
-@patch("main.return_chosen_port",return_value='COM1')
+@patch("pyccapt.main.return_chosen_port",return_value='COM1')
 def test_check_cryo_assert_port_not_open(mock):
     import serial
-    from tools import variables
-    from devices import initialize_devices
     conf = {
         "mode": "advance",
         "visualization": "tof",
@@ -283,12 +253,10 @@ def test_check_cryo_assert_port_not_open(mock):
     response  = main.check_cryo(conf)
     assert response == None
 
-@patch("main.return_chosen_port",return_value='COM1')
+@patch("pyccapt.main.return_chosen_port",return_value='COM1')
 @patch.object(main,"print_log")
 def test_check_cryo_assert_cryo_off(mock,mock_port_func):
     import serial
-    from tools import variables
-    from devices import initialize_devices
     conf = {
         "mode": "advance",
         "visualization": "tof",
