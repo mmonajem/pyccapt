@@ -1,7 +1,11 @@
+from pickletools import string1
 import numpy as np
 import h5py
 import pandas as pd
 import scipy.io
+import logging_library
+
+logger = logging_library.logger_creator('data_tools')
 
 
 def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: dataframe - Pandas dataframe converted from H5 file":
@@ -26,7 +30,6 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: datafram
             subGroupList = []
             for item in groups:
                 groupDict[item] = list(hdf[item].keys())
-            print(groupDict)
             for key, value in groupDict.items():
                 for item in value:
                     dataset = pd.DataFrame(np.array(hdf['{}/{}'.format(key, item)]), columns=['values'])
@@ -42,9 +45,12 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: datafram
 
             return dataframeStorage
     except FileNotFoundError as error:
-        print("[*] HDF5 File could not be found ->", error)
+        logger.critical(error)
+        logger.critical("[*] HDF5 File could not be found")
+        
     except IndexError as error:
-        print("[*] No Group keys could be found in HDF5 File ->", error)
+        logger.critical(error)
+        logger.critical("[*] No Group keys could be found in HDF5 File")
 
 
 def read_hdf5_through_pandas(filename:"type:string - Path to hdf5(.h5) file")->"type: dataframe - Pandas Dataframe":
@@ -56,7 +62,8 @@ def read_hdf5_through_pandas(filename:"type:string - Path to hdf5(.h5) file")->"
         hdf5FileResponse = pd.read_hdf(filename, mode='r')
         return hdf5FileResponse
     except FileNotFoundError as error:
-        print("[*] HDF5 File could not be found ->", error)
+        logger.info(error)
+        logger.critical("[*] HDF5 File could not be found")
 
 
 def read_mat_files(filename:"type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
@@ -64,7 +71,8 @@ def read_mat_files(filename:"type:string - Path to .mat file") -> " type: dict -
         matFileResponse = scipy.io.loadmat(filename)
         return matFileResponse
     except FileNotFoundError as error:
-        print("[*] HDF5 File could not be found ->", error)
+        logger.critical(error)
+        logger.critical("[*] Mat File could not be found")
 
 
 def convert_mat_to_df(matFileResponse:"type: dict - content of .mat file"):
@@ -72,6 +80,7 @@ def convert_mat_to_df(matFileResponse:"type: dict - content of .mat file"):
     key = 'dataframe/isotope'
     filename = 'isotopeTable.h5'
     store_df_to_hdf(filename, pdDataframe, key)
+    return pdDataframe
 
 
 def store_df_to_hdf(filename:"type: string - name of hdf5 file", 
