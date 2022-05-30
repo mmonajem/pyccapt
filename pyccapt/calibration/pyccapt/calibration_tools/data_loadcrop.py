@@ -2,19 +2,25 @@
 This is the main script of loading and croping the dataset.
 """
 
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from matplotlib.patches import Circle, Rectangle
 import pandas as pd
+import logging_library
 
 from pyccapt.calibration_tools import selectors_data
 from pyccapt.calibration_tools import variables, data_tools
+
+logger = logging_library.logger_creator('data_loadcrop')
 
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file") -> "type:list - list of dataframes":
     try:
         hdf5Data = data_tools.read_hdf5(filename)
+        if hdf5Data is None:
+            raise FileNotFoundError
         dld_highVoltage = hdf5Data['dld/high_voltage']
         dld_pulseVoltage = hdf5Data['dld/pulse_voltage']
         dld_startCounter = hdf5Data['dld/start_counter']
@@ -24,7 +30,12 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
         dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
         return dldGroupStorage
     except KeyError as error:
-        print("[*]Keys missing in the dataset -> ", error)
+        logger.critical(error)
+        logger.critical("[*]Keys missing in the dataset")
+    except FileNotFoundError as error:
+        logger.critical(error)
+        logger.critical("[*] HDF5 file not found")
+
 
 
 def concatenate_dataframes_of_dld_grp(
@@ -80,16 +91,20 @@ def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:l
 def rectangle_box_selector(axisObject: "type:object"):
     # drawtype is 'box' or 'line' or 'none'
     selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback,
-                                                          useblit=True,
-                                                          button=[1, 3],  # don't use middle button
-                                                          minspanx=1, minspany=1,
-                                                          spancoords='pixels',
-                                                          interactive=True)
+                                                            useblit=True,
+                                                            button=[1, 3],  # don't use middle button
+                                                            minspanx=1, minspany=1,
+                                                            spancoords='pixels',
+                                                            interactive=True)
+    
+    
 
 
 def crop_dataset(dld_masterDataframe: "type:list - list of dataframes") -> "type:list  - cropped list content":
     dld_masterDataframe = dld_masterDataframe.to_numpy()
+    print(dld_masterDataframe)
     data_crop = dld_masterDataframe[int(variables.selected_x1):int(variables.selected_x2), :]
+    print(data_crop)
     return data_crop
 
 

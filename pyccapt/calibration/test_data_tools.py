@@ -14,7 +14,6 @@ import scipy
 from deepdiff import DeepDiff
 
 
-
 @patch.object(data_tools.logger, "critical")
 def test_read_hdf5_file_not_found(mock):
     file_name = 'not_existing_file.h5'
