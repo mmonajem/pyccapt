@@ -6,8 +6,8 @@ import time
 import numpy as np
 from queue import Queue
 
-from pyccapt.control.pyccapt.devices import initialize_devices
-from pyccapt.control.pyccapt.tdc_surface_concept import scTDC
+from pyccapt.devices import initialize_devices
+from pyccapt.tdc_surface_concept import scTDC
 
 # define some constants to distinguish the type of element placed in the queue
 QUEUE_DATA = 0

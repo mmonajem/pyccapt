@@ -37,8 +37,9 @@ class DRS(object):
         try:
             # load the library
             p = os.path.abspath(os.path.join(__file__, "../."))
+            print(p)
             os.chdir(p)
-            self.drs_lib = ctypes.CDLL("./drs_lib.dll")
+            self.drs_lib = ctypes.CDLL("/home/harsh/researchAssistant/pyccapt/pyccapt/control/pyccapt/drs/drs_lib.dll")
         except Exception as e:
             print("DRS DLL was not found")
             print(e)

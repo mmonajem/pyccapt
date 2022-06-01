@@ -60,8 +60,9 @@ class APT_ADVANCE:
         self.queue_ch3_wave = queue_ch3_wave
         self.logger = logger
         self.conf = conf
-        self.log_apt_tdc_surface_consept = loggi.logger_creator('apt_tdc_surface_consept', 'apt_tdc_surface_consept.log')
-
+        #self.log_apt_tdc_surface_consept = loggi.logger_creator('apt_tdc_surface_consept', 'apt_tdc_surface_consept.log')
+    def print_log(self,string_to_be_printed):
+        print(string_to_be_printed)
 
     def initialize_v_dc(self):
         """
@@ -78,7 +79,7 @@ class APT_ADVANCE:
         Returns:
             Does not return anything
         """
-        self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
+        #self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
             port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
@@ -87,7 +88,7 @@ class APT_ADVANCE:
             parity=serial.PARITY_NONE,  # N
             stopbits=serial.STOPBITS_ONE  # 1
         )
-        self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
+        #self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
 
         # configure the COM port to talk to. Default values: 115200,8,N,1
         if self.com_port_v_dc.is_open:
@@ -99,8 +100,8 @@ class APT_ADVANCE:
             for cmd in range(len(cmd_list)):
                 self.command_v_dc(cmd_list[cmd])
         else:
-            self.log_apt_tdc_surface_consept.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
-            print("Couldn't open Port!")
+            #self.log_apt_tdc_surface_consept.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
+            self.print_log("Could not open port")
             exit()
 
     def initialize_v_p(self):
