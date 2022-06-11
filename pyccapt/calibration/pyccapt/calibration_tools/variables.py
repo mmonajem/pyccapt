@@ -2,7 +2,6 @@
 This is the main script for global variables.
 """
 
-
 def init():
 
     global selected_x_fdm
@@ -21,7 +20,7 @@ def init():
     global path
 
 
-    selected_x_fdm = 0
+    init.selected_x_fdm = 0
     selected_y_fdm = 0
     roi_fdm = 0
 

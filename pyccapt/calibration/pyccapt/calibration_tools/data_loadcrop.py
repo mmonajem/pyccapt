@@ -99,12 +99,10 @@ def rectangle_box_selector(axisObject: "type:object"):
     
     
 
-
+# Returning error TO-DO
 def crop_dataset(dld_masterDataframe: "type:list - list of dataframes") -> "type:list  - cropped list content":
     dld_masterDataframe = dld_masterDataframe.to_numpy()
-    print(dld_masterDataframe)
     data_crop = dld_masterDataframe[int(variables.selected_x1):int(variables.selected_x2), :]
-    print(data_crop)
     return data_crop
 
 
@@ -134,6 +132,7 @@ def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", sav
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     elliptical_shape_selector(ax1, fig1)
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -151,11 +150,12 @@ def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list co
     ax1.set_ylabel("y [mm]", color="red", fontsize=14)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
+    logger.info("Circle selector Called")
     circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
                   alpha=0.2, color='r', linewidth=1)
     ax1.add_patch(circ)
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -182,6 +182,7 @@ def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", save_nam
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -192,7 +193,7 @@ def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
                                name: "type:string - name of h5 file"):
     # save the cropped data
     hierarchyName = 'df'
-    print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
+    logger.info('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
     hdf5Dataframe = pd.DataFrame(data=data_crop,
                                  columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
                                           'dld/x', 'dld/y'])
